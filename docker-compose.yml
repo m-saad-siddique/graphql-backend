@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    container_name: rails_db_1
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: myapp_development
+    volumes:
+      - postgres_data_1:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rails_web_1
+    command: bash -c "bundle install && ./bin/rails db:create db:migrate && ./bin/rails server -b 0.0.0.0"
+    volumes:
+      - .:/rails
+    ports:
+      - "3001:3000"
+    environment:
+      DATABASE_HOST: db
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: password
+    depends_on:
+      - db
+
+volumes:
+  postgres_data_1:
